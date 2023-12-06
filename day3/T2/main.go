@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 )
 
 type Point struct {
@@ -21,6 +22,15 @@ var POSITIONS = []Point{
 	{x: 1, y: -1},
 	{x: 1, y: 0},
 	{x: 1, y: 1},
+}
+
+func Contains(a []Point, x Point) bool {
+	for _, n := range a {
+		if x.x == n.x && x.y == n.y {
+			return true
+		}
+	}
+	return false
 }
 
 func createFileReader(fileName string) *bufio.Reader {
@@ -67,28 +77,12 @@ func isNumeric(ch byte) bool {
 
 func isValid(s []string, row int, col int, n int) bool {
 	if row < n && row >= 0 && col < n && col >= 0 {
-		if s[row][col] != '.' && !isNumeric(s[row][col]) {
+		if s[row][col] == '*' {
 			return true
 		}
 	}
 
 	return false
-}
-
-func isNumberPartOfEngineSchematic(s []string, num string, tempStart int, tempEnd int, row int) bool {
-	n := len(s)
-
-	flag := false
-
-	for i := tempStart; i <= tempEnd; i++ {
-		for _, pos := range POSITIONS {
-			if isValid(s, row+pos.y, i+pos.x, n) {
-				flag = true
-			}
-		}
-	}
-
-	return flag
 }
 
 func GetAllStarsMap(s []string) map[Point][]int {
@@ -101,7 +95,7 @@ func GetAllStarsMap(s []string) map[Point][]int {
 					x: i,
 					y: j,
 				}
-				ans[pt] = []int{0, 0}
+				ans[pt] = []int{}
 			}
 		}
 	}
@@ -109,13 +103,74 @@ func GetAllStarsMap(s []string) map[Point][]int {
 	return ans
 }
 
+func isNumberPartOfEngineSchematic(s []string, num string, tempStart int, tempEnd int, row int) []Point {
+	n := len(s)
+
+	var arr []Point = []Point{}
+
+	for i := tempStart; i <= tempEnd; i++ {
+		for _, pos := range POSITIONS {
+			if isValid(s, row+pos.y, i+pos.x, n) {
+				pt := Point{
+					x: i + pos.x,
+					y: row + pos.y,
+				}
+
+				if Contains(arr, pt) {
+					continue
+				}
+
+				arr = append(arr, pt)
+			}
+		}
+	}
+
+	return arr
+}
+
 func GetPartsForEngineSchematics(s []string, starPos map[Point][]int) int {
 	n := len(s)
 	ans := 0
 
 	for i := 0; i < n; i++ {
+		temp := ""
 		for j := 0; j < n; j++ {
+			if isNumeric(s[i][j]) {
+				temp += string(s[i][j])
 
+				if j != n-1 {
+					continue
+				}
+			}
+			if temp == "" {
+				continue
+			} else {
+				num := temp
+
+				tempStart := j - len(temp)
+				tempEnd := j - 1
+				pts := isNumberPartOfEngineSchematic(s, num, tempStart, tempEnd, i)
+
+				if len(pts) > 0 {
+					res, _ := strconv.Atoi(num)
+
+					for _, pt := range pts {
+						starPos[pt] = append(starPos[pt], res)
+					}
+				}
+
+				temp = ""
+			}
+		}
+	}
+
+	for pt, nums := range starPos {
+		fmt.Printf("%+v ---> %+v\n", pt, nums)
+		if len(nums) == 2 {
+			n1 := nums[0]
+			n2 := nums[1]
+
+			ans += (n1 * n2)
 		}
 	}
 

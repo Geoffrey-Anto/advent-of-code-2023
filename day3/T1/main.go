@@ -101,47 +101,27 @@ func GetPartsForEngineSchematics(s []string) int {
 		for j := 0; j < n; j++ {
 			if isNumeric(s[i][j]) {
 				temp += string(s[i][j])
-				if j == n-1 {
-					if temp == "" {
-						continue
-					} else {
-						num := temp
 
-						tempStart := j - len(temp)
-						tempEnd := j - 1
-
-						if isNumberPartOfEngineSchematic(s, num, tempStart, tempEnd, i) {
-							res, _ := strconv.Atoi(num)
-							ans += res
-
-							s[i] = Replace(s[i], tempStart, tempEnd, '.')
-						} else {
-							fmt.Println(num)
-						}
-
-						temp = ""
-					}
-				}
-			} else {
-				if temp == "" {
+				if j != n-1 {
 					continue
-				} else {
-					num := temp
-
-					tempStart := j - len(temp)
-					tempEnd := j - 1
-
-					if isNumberPartOfEngineSchematic(s, num, tempStart, tempEnd, i) {
-						res, _ := strconv.Atoi(num)
-						ans += res
-
-						s[i] = Replace(s[i], tempStart, tempEnd, '.')
-					} else {
-						fmt.Println(num)
-					}
-
-					temp = ""
 				}
+			}
+			if temp == "" {
+				continue
+			} else {
+				num := temp
+
+				tempStart := j - len(temp)
+				tempEnd := j - 1
+
+				if isNumberPartOfEngineSchematic(s, num, tempStart, tempEnd, i) {
+					res, _ := strconv.Atoi(num)
+					ans += res
+
+					s[i] = Replace(s[i], tempStart, tempEnd, '.')
+				}
+
+				temp = ""
 			}
 		}
 	}
